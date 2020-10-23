@@ -66,6 +66,72 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
+		{
+			sql: "SELECT 1 + 1;",
+			tokens: token.Tokens{
+				{
+					Type:    token.KEYWORD,
+					Literal: "SELECT",
+					Value: value.Value{
+						Type: value.K_SELECT,
+					},
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "1",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 1,
+					},
+				},
+				{
+					Type:    token.SYMBOL,
+					Literal: "+",
+					Value: value.Value{
+						Type: value.S_PLUS,
+					},
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "1",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 1,
+					},
+				},
+				{
+					Type:    token.SYMBOL,
+					Literal: ";",
+					Value: value.Value{
+						Type: value.S_SEMICOLON,
+					},
+				},
+				{
+					Type: token.EOS,
+				},
+			},
+			expected: &ast.AST{
+				SQL: []ast.SQL{
+					{
+						SELECTStatement: &ast.SELECTStatement{
+							Select: &ast.SELECTClause{
+								ResultColumns: []ast.ResultColumn{
+									{
+										Expression: &ast.Expression{
+											Literal: &ast.Literal{
+												Numeric: &ast.Numeric{
+													Integral: 1,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for tn, tc := range testCases {
