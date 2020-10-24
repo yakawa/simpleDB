@@ -39,8 +39,9 @@ const (
 	_ OperatorType = iota
 	B_PLUS
 	B_MINUS
-	B_TIMES
-	B_DIVISION
+	B_ASTERISK
+	B_SOLIDAS
+	B_PERCENT
 )
 
 func (o OperatorType) String() string {
@@ -49,10 +50,12 @@ func (o OperatorType) String() string {
 		return "+"
 	case B_MINUS:
 		return "-"
-	case B_TIMES:
+	case B_ASTERISK:
 		return "*"
-	case B_DIVISION:
+	case B_SOLIDAS:
 		return "/"
+	case B_PERCENT:
+		return "%"
 	default:
 		return "Unknwon Operation"
 	}

@@ -43,7 +43,7 @@ func TestLexer(t *testing.T) {
 			},
 		},
 		{
-			input: "SELECT 1 + 1;",
+			input: "SELECT 1 + 2;",
 			expected: token.Tokens{
 				{
 					Type:    token.KEYWORD,
@@ -69,10 +69,10 @@ func TestLexer(t *testing.T) {
 				},
 				{
 					Type:    token.NUMBER,
-					Literal: "1",
+					Literal: "2",
 					Value: value.Value{
 						Type:    value.INTEGER,
-						Integer: 1,
+						Integer: 2,
 					},
 				},
 				{
@@ -112,7 +112,14 @@ func TestLexer(t *testing.T) {
 						Type: value.S_MINUS,
 					},
 				},
-
+				{
+					Type:    token.NUMBER,
+					Literal: "1",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 1,
+					},
+				},
 				{
 					Type:    token.SYMBOL,
 					Literal: ";",

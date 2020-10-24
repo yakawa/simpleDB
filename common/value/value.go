@@ -11,14 +11,16 @@ type Type int
 
 const (
 	UNKNOWN Type = iota
+	EOS
 	INTEGER
 	IDENT
 	K_SELECT
 	S_SEMICOLON
 	S_PLUS
 	S_MINUS
-	S_TIMES
-	S_DIVISION
+	S_ASTERISK
+	S_SOLIDAS
+	S_PERCENT
 )
 
 func (t Type) String() string {

@@ -67,7 +67,7 @@ func TestParser(t *testing.T) {
 			},
 		},
 		{
-			sql: "SELECT 1 + 1;",
+			sql: "SELECT 1 + 2;",
 			tokens: token.Tokens{
 				{
 					Type:    token.KEYWORD,
@@ -93,10 +93,10 @@ func TestParser(t *testing.T) {
 				},
 				{
 					Type:    token.NUMBER,
-					Literal: "1",
+					Literal: "2",
 					Value: value.Value{
 						Type:    value.INTEGER,
-						Integer: 1,
+						Integer: 2,
 					},
 				},
 				{
@@ -118,9 +118,21 @@ func TestParser(t *testing.T) {
 								ResultColumns: []ast.ResultColumn{
 									{
 										Expression: &ast.Expression{
-											Literal: &ast.Literal{
-												Numeric: &ast.Numeric{
-													Integral: 1,
+											BinaryOperation: &ast.BinaryOpe{
+												Operator: ast.B_PLUS,
+												Left: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 1,
+														},
+													},
+												},
+												Right: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 2,
+														},
+													},
 												},
 											},
 										},
@@ -135,10 +147,13 @@ func TestParser(t *testing.T) {
 	}
 
 	for tn, tc := range testCases {
-		p := Parse(tc.tokens)
+		p, err := Parse(tc.tokens)
+		if err != nil {
+			t.Fatalf("[%d] %s : error: %s", tn, tc.sql, err)
+		}
 
 		if !reflect.DeepEqual(p, tc.expected) {
-			t.Fatalf("[%d] %s Parse Error", tn, tc.sql)
+			t.Fatalf("[%d] %s Parse Error :%#+v:", tn, tc.sql, p.SQL[0].SELECTStatement.Select.ResultColumns[0])
 		}
 	}
 }

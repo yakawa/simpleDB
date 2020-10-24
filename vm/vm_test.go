@@ -33,10 +33,42 @@ func TestRun(t *testing.T) {
 				},
 			},
 		},
+		{
+			sql: "SEELCT 1 + 2;",
+			vmc: []VMCode{
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 2,
+					},
+				},
+				{
+					Operator: ADD,
+				},
+				{
+					Operator: STORE,
+				},
+			},
+			expected: []result.Value{
+				{
+					Type:     result.Integral,
+					Integral: 3,
+				},
+			},
+		},
 	}
 
 	for tn, tc := range testCases {
 		rslt := Run(tc.vmc)
+		t.Logf("[%d] %#+v", tn, rslt)
 		if len(tc.expected) != len(rslt) {
 			t.Fatalf("[%d] %s Mistmach Result numbers", tn, tc.sql)
 		}

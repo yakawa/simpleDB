@@ -10,7 +10,7 @@ func Translate(a *ast.AST) []vm.VMCode {
 	for _, sql := range a.SQL {
 		for _, col := range sql.SELECTStatement.Select.ResultColumns {
 			c := translateResultColumn(col)
-			codes = append(codes, c)
+			codes = append(codes, c...)
 
 			s := vm.VMCode{
 				Operator: vm.STORE,
@@ -20,21 +20,61 @@ func Translate(a *ast.AST) []vm.VMCode {
 			}
 			codes = append(codes, s)
 		}
-
 	}
 	return codes
 }
 
-func translateResultColumn(c ast.ResultColumn) vm.VMCode {
-	code := vm.VMCode{}
+func translateResultColumn(c ast.ResultColumn) []vm.VMCode {
+	codes := translateExpression(c.Expression)
+	return codes
+}
+
+func translateExpression(expr *ast.Expression) []vm.VMCode {
+	codes := []vm.VMCode{}
 	v := vm.VMValue{}
-	if c.Expression.Literal != nil {
-		if c.Expression.Literal.Numeric != nil {
-			v.Type = vm.Integer
-			v.Integral = c.Expression.Literal.Numeric.Integral
-			code.Operator = vm.PUSH
-			code.Operand1 = v
+	if expr.Literal != nil {
+		if expr.Literal.Numeric != nil {
+			v.Integral = expr.Literal.Numeric.Integral
+			c := vm.VMCode{
+				Operator: vm.PUSH,
+				Operand1: v,
+			}
+			codes = append(codes, c)
 		}
+		return codes
+	} else if expr.BinaryOperation != nil {
+		cl := translateExpression(expr.BinaryOperation.Left)
+		codes = append(codes, cl...)
+		cr := translateExpression(expr.BinaryOperation.Right)
+		codes = append(codes, cr...)
+
+		var c vm.VMCode
+		switch expr.BinaryOperation.Operator {
+		case ast.B_PLUS:
+			c = vm.VMCode{
+				Operator: vm.ADD,
+			}
+		case ast.B_MINUS:
+			c = vm.VMCode{
+				Operator: vm.SUB,
+			}
+		case ast.B_ASTERISK:
+			c = vm.VMCode{
+				Operator: vm.MUL,
+			}
+		case ast.B_SOLIDAS:
+			c = vm.VMCode{
+				Operator: vm.DIV,
+			}
+		case ast.B_PERCENT:
+			c = vm.VMCode{
+				Operator: vm.MOD,
+			}
+		default:
+			return codes
+		}
+		codes = append(codes, c)
+		return codes
 	}
-	return code
+	return codes
 }

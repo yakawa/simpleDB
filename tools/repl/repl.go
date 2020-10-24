@@ -58,7 +58,7 @@ func Start(in io.ReadCloser, out io.Writer) {
 			}
 		} else {
 			tokens := lexer.Lex(line)
-			a := parser.Parse(tokens)
+			a, _ := parser.Parse(tokens)
 			vc := translator.Translate(a)
 			rs := vm.Run(vc)
 			for i, col := range rs {

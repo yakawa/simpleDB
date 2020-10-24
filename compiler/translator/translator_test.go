@@ -49,6 +49,64 @@ func TestTranslate(t *testing.T) {
 				},
 			},
 		},
+		{
+			sql: "SELECT 1 + 2;",
+			ast: ast.AST{
+				SQL: []ast.SQL{
+					{
+						SELECTStatement: &ast.SELECTStatement{
+							Select: &ast.SELECTClause{
+								ResultColumns: []ast.ResultColumn{
+									{
+										Expression: &ast.Expression{
+											BinaryOperation: &ast.BinaryOpe{
+												Operator: ast.B_PLUS,
+												Left: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 1,
+														},
+													},
+												},
+												Right: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 2,
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: []vm.VMCode{
+				{
+					Operator: vm.PUSH,
+					Operand1: vm.VMValue{
+						Type:     vm.Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: vm.PUSH,
+					Operand1: vm.VMValue{
+						Type:     vm.Integer,
+						Integral: 2,
+					},
+				},
+				{
+					Operator: vm.ADD,
+				},
+				{
+					Operator: vm.STORE,
+				},
+			},
+		},
 	}
 
 	for tn, tc := range testCases {
