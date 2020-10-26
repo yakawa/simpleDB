@@ -10,7 +10,7 @@ import (
 	"github.com/yakawa/simpleDB/common/result"
 	"github.com/yakawa/simpleDB/compiler/lexer"
 	"github.com/yakawa/simpleDB/compiler/parser"
-	"github.com/yakawa/simpleDB/compiler/translator"
+	"github.com/yakawa/simpleDB/compiler/planner"
 	"github.com/yakawa/simpleDB/vm"
 )
 
@@ -59,7 +59,10 @@ func Start(in io.ReadCloser, out io.Writer) {
 		} else {
 			tokens := lexer.Lex(line)
 			a, _ := parser.Parse(tokens)
-			vc := translator.Translate(a)
+			vc := planner.Translate(a)
+			for _, c := range vc {
+				fmt.Fprintf(out, "%#+v\n", c)
+			}
 			rs := vm.Run(vc)
 			for i, col := range rs {
 				switch col.Type {

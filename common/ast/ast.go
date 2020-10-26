@@ -10,10 +10,15 @@ type SQL struct {
 
 type SELECTStatement struct {
 	Select *SELECTClause
+	From   *FROMClause
 }
 
 type SELECTClause struct {
 	ResultColumns []ResultColumn
+}
+
+type FROMClause struct {
+	Table *Table
 }
 
 type ResultColumn struct {
@@ -24,6 +29,8 @@ type Expression struct {
 	Literal         *Literal
 	UnaryOperation  *UnaryOpe
 	BinaryOperation *BinaryOpe
+	FunctionCall    *FunctionCall
+	Column          *Column
 }
 
 type Literal struct {
@@ -79,4 +86,23 @@ type BinaryOpe struct {
 type UnaryOpe struct {
 	Operator OperatorType
 	Expr     *Expression
+}
+
+type FunctionCall struct {
+	Name string
+	Args []Expression
+}
+
+type Column struct {
+	Column string
+	Table  string
+	DB     string
+	Schema string
+}
+
+type Table struct {
+	Table  string
+	DB     string
+	Schema string
+	Alias  string
 }

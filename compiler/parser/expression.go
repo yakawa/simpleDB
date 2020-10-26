@@ -3,6 +3,7 @@ package parser
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/yakawa/simpleDB/common/ast"
 	"github.com/yakawa/simpleDB/common/token"
@@ -12,7 +13,7 @@ func (p *parser) parseExpression(precedence int) (*ast.Expression, error) {
 	expr := &ast.Expression{}
 	unary, exists := p.unaryParseFunc[p.currentToken.Type]
 	if !exists {
-		return expr, errors.New(fmt.Sprintf("Unknown Unary Operator: %s", p.currentToken.Value.Type))
+		return expr, errors.New(fmt.Sprintf("Unknown Unary Operator: %s", p.currentToken.Type))
 	}
 
 	left, err := unary()
@@ -44,6 +45,22 @@ func (p *parser) parseNumber() (*ast.Expression, error) {
 		},
 	}
 	return expr, nil
+}
+
+func (p *parser) parseIdent() (*ast.Expression, error) {
+	if p.getNextToken().Type == token.S_LPAREN {
+		expr, err := p.parseFunctionCallExpr()
+		if err != nil {
+			return &ast.Expression{}, err
+		}
+		return expr, nil
+	} else {
+		expr, err := p.parseColumnExpr()
+		if err != nil {
+			return &ast.Expression{}, err
+		}
+		return expr, nil
+	}
 }
 
 func (p *parser) parseBinaryExpr(left *ast.Expression) (*ast.Expression, error) {
@@ -112,6 +129,37 @@ func (p *parser) parsePrefixExpr() (*ast.Expression, error) {
 	}
 
 	expr.UnaryOperation.Expr = ex
+
+	return expr, nil
+}
+
+func (p *parser) parseFunctionCallExpr() (*ast.Expression, error) {
+	expr := &ast.Expression{
+		FunctionCall: &ast.FunctionCall{},
+	}
+
+	expr.FunctionCall.Name = strings.ToUpper(p.currentToken.Literal)
+
+	for {
+		p.readToken()
+		ex, err := p.parseExpression(LOWEST)
+		if err != nil {
+			return expr, err
+		}
+		expr.FunctionCall.Args = append(expr.FunctionCall.Args, *ex)
+		if p.currentToken.Type == token.S_RPAREN {
+			break
+		}
+	}
+
+	return expr, nil
+}
+
+func (p *parser) parseColumnExpr() (*ast.Expression, error) {
+	expr := &ast.Expression{
+		Column: &ast.Column{},
+	}
+	expr.Column.Column = p.currentToken.Literal
 
 	return expr, nil
 }

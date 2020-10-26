@@ -136,6 +136,121 @@ func TestRun(t *testing.T) {
 				},
 			},
 		},
+		{
+			sql: "SELECT ABS(-1);",
+			vmc: []VMCode{
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: -1,
+					},
+				},
+				{
+					Operator: MUL,
+				},
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: CALL,
+					Operand1: VMValue{
+						Type:   String,
+						String: "ABS",
+					},
+				},
+				{
+					Operator: STORE,
+				},
+			},
+			expected: []result.Value{
+				{
+					Type:     result.Integral,
+					Integral: 1,
+				},
+			},
+		},
+		{
+			sql: "SELECT ABS(1);",
+			vmc: []VMCode{
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: CALL,
+					Operand1: VMValue{
+						Type:   String,
+						String: "ABS",
+					},
+				},
+				{
+					Operator: STORE,
+				},
+			},
+			expected: []result.Value{
+				{
+					Type:     result.Integral,
+					Integral: 1,
+				},
+			},
+		},
+		{
+			sql: "SELECT 1, 2;",
+			vmc: []VMCode{
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: STORE,
+				},
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 2,
+					},
+				},
+				{
+					Operator: STORE,
+				},
+			},
+			expected: []result.Value{
+				{
+					Type:     result.Integral,
+					Integral: 1,
+				},
+				{
+					Type:     result.Integral,
+					Integral: 2,
+				},
+			},
+		},
 	}
 
 	for tn, tc := range testCases {

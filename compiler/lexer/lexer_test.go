@@ -220,6 +220,110 @@ func TestLexer(t *testing.T) {
 				},
 			},
 		},
+		{
+			input: "SELECT ABS(-1);",
+			expected: token.Tokens{
+				{
+					Type:    token.K_SELECT,
+					Literal: "SELECT",
+				},
+				{
+					Type:    token.IDENT,
+					Literal: "ABS",
+				},
+				{
+					Type:    token.S_LPAREN,
+					Literal: "(",
+				},
+				{
+					Type:    token.S_MINUS,
+					Literal: "-",
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "1",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 1,
+					},
+				},
+				{
+					Type:    token.S_RPAREN,
+					Literal: ")",
+				},
+				{
+					Type:    token.S_SEMICOLON,
+					Literal: ";",
+				},
+				{
+					Type: token.EOS,
+				},
+			},
+		},
+		{
+			input: "SELECT 1,2;",
+			expected: token.Tokens{
+				{
+					Type:    token.K_SELECT,
+					Literal: "SELECT",
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "1",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 1,
+					},
+				},
+				{
+					Type:    token.S_COMMA,
+					Literal: ",",
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "2",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 2,
+					},
+				},
+				{
+					Type:    token.S_SEMICOLON,
+					Literal: ";",
+				},
+				{
+					Type: token.EOS,
+				},
+			},
+		},
+		{
+			input: "SELECT colA FROM tbl1;",
+			expected: token.Tokens{
+				{
+					Type:    token.K_SELECT,
+					Literal: "SELECT",
+				},
+				{
+					Type:    token.IDENT,
+					Literal: "colA",
+				},
+				{
+					Type:    token.K_FROM,
+					Literal: "FROM",
+				},
+				{
+					Type:    token.IDENT,
+					Literal: "tbl1",
+				},
+				{
+					Type:    token.S_SEMICOLON,
+					Literal: ";",
+				},
+				{
+					Type: token.EOS,
+				},
+			},
+		},
 	}
 
 	for tn, tc := range testCases {

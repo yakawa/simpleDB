@@ -1,6 +1,9 @@
 package parser
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/yakawa/simpleDB/common/ast"
 	"github.com/yakawa/simpleDB/common/token"
 	"github.com/yakawa/simpleDB/common/value"
@@ -60,6 +63,7 @@ func new(tokens token.Tokens) *parser {
 	p.unaryParseFunc[token.S_LPAREN] = p.parseGroupedExpr
 	p.unaryParseFunc[token.S_PLUS] = p.parsePrefixExpr
 	p.unaryParseFunc[token.S_MINUS] = p.parsePrefixExpr
+	p.unaryParseFunc[token.IDENT] = p.parseIdent
 
 	p.binaryParseFunc[token.S_PLUS] = p.parseBinaryExpr
 	p.binaryParseFunc[token.S_MINUS] = p.parseBinaryExpr
@@ -116,10 +120,8 @@ func (p *parser) getNextTokenPrecedence() int {
 
 func (p *parser) parse() ([]ast.SQL, error) {
 	SQLs := []ast.SQL{}
-	loop := true
 	for {
-		switch p.currentToken.Type {
-		case token.K_SELECT:
+		if p.currentToken.Type == token.K_SELECT {
 			ss, err := p.parseSELECTStatement()
 			if err != nil {
 				return SQLs, err
@@ -128,10 +130,13 @@ func (p *parser) parse() ([]ast.SQL, error) {
 				SELECTStatement: ss,
 			}
 			SQLs = append(SQLs, sql)
-		default:
-			loop = false
+		} else {
+			return SQLs, errors.New(fmt.Sprintf("Unexpected Token %s", p.currentToken.Literal))
 		}
-		if !loop {
+		if p.currentToken.Type == token.S_SEMICOLON {
+			p.readToken()
+		}
+		if p.currentToken.Type == token.EOS {
 			break
 		}
 	}

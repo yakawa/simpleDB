@@ -74,7 +74,7 @@ func (l *lexer) tokenize() token.Tokens {
 func (l *lexer) findToken() (token.Token, error) {
 	ch := l.getCurrentChar()
 	switch ch {
-	case ';', '+', '-', '*', '/', '%', '(', ')':
+	case ';', '+', '-', '*', '/', '%', '(', ')', ',':
 		v, tp := l.lookupSymbol()
 		t := token.Token{
 			Type:    tp,
@@ -173,6 +173,10 @@ func (l *lexer) lookupSymbol() (string, token.Type) {
 	case ')':
 		val = token.S_RPAREN
 		v = ")"
+	case ',':
+		val = token.S_COMMA
+		v = ","
+
 	default:
 		val = token.UNKNOWN
 		v = ""

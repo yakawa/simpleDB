@@ -16,6 +16,7 @@ const (
 	NUMBER
 
 	K_SELECT
+	K_FROM
 
 	S_PLUS
 	S_MINUS
@@ -25,6 +26,7 @@ const (
 	S_SEMICOLON
 	S_LPAREN
 	S_RPAREN
+	S_COMMA
 )
 
 func (t Type) String() string {
@@ -42,6 +44,8 @@ func (t Type) String() string {
 
 	case K_SELECT:
 		return "Keyword (SELECT)"
+	case K_FROM:
+		return "Keyword (FROM)"
 
 	case S_PLUS:
 		return "Symbol (+)"
@@ -59,6 +63,8 @@ func (t Type) String() string {
 		return "Symbol (()"
 	case S_RPAREN:
 		return "Symbol ())"
+	case S_COMMA:
+		return "Symbol (,)"
 
 	default:
 		return "Unknown Type"
@@ -86,6 +92,8 @@ func CheckKeyword(s string) (bool, Type) {
 	switch strings.ToUpper(s) {
 	case "SELECT":
 		return true, K_SELECT
+	case "FROM":
+		return true, K_FROM
 	}
 	return false, UNKNOWN
 }

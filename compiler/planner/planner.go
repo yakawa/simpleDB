@@ -1,4 +1,4 @@
-package translator
+package planner
 
 import (
 	"github.com/yakawa/simpleDB/common/ast"
@@ -8,6 +8,10 @@ import (
 func Translate(a *ast.AST) []vm.VMCode {
 	codes := []vm.VMCode{}
 	for _, sql := range a.SQL {
+		if sql.SELECTStatement.From != nil {
+			c := translateFROM(sql.SELECTStatement.From)
+			codes = append(codes, c...)
+		}
 		for _, col := range sql.SELECTStatement.Select.ResultColumns {
 			c := translateResultColumn(col)
 			codes = append(codes, c...)
@@ -34,6 +38,7 @@ func translateExpression(expr *ast.Expression) []vm.VMCode {
 	v := vm.VMValue{}
 	if expr.Literal != nil {
 		if expr.Literal.Numeric != nil {
+			v.Type = vm.Integer
 			v.Integral = expr.Literal.Numeric.Integral
 			c := vm.VMCode{
 				Operator: vm.PUSH,
@@ -84,6 +89,42 @@ func translateExpression(expr *ast.Expression) []vm.VMCode {
 			codes = append(codes, vm.VMCode{Operator: vm.MUL})
 		}
 		return codes
+	} else if expr.FunctionCall != nil {
+		for _, arg := range expr.FunctionCall.Args {
+			c := translateExpression(&arg)
+			codes = append(codes, c...)
+		}
+		codes = append(codes, vm.VMCode{Operator: vm.PUSH, Operand1: vm.VMValue{Type: vm.Integer, Integral: len(expr.FunctionCall.Args)}})
+		codes = append(codes, vm.VMCode{Operator: vm.CALL, Operand1: vm.VMValue{Type: vm.String, String: expr.FunctionCall.Name}})
+		return codes
+	} else if expr.Column != nil {
+		c := vm.VMCode{
+			Operator: vm.FETCH,
+			Operand1: vm.VMValue{
+				Column: vm.VMColumn{
+					Column: expr.Column.Column,
+					DB:     "_",
+					Schema: "LOCAL",
+				},
+			},
+		}
+		codes = append(codes, c)
 	}
+	return codes
+}
+
+func translateFROM(from *ast.FROMClause) []vm.VMCode {
+	codes := []vm.VMCode{}
+	c := vm.VMCode{
+		Operator: vm.READ,
+		Operand1: vm.VMValue{
+			Table: vm.VMTable{
+				Table:  from.Table.Table,
+				DB:     "_",
+				Schema: "LOCAL",
+			},
+		},
+	}
+	codes = append(codes, c)
 	return codes
 }
