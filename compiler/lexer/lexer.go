@@ -74,12 +74,11 @@ func (l *lexer) tokenize() token.Tokens {
 func (l *lexer) findToken() (token.Token, error) {
 	ch := l.getCurrentChar()
 	switch ch {
-	case ';', '+', '-', '*', '/', '%':
-		v, val := l.lookupSymbol()
+	case ';', '+', '-', '*', '/', '%', '(', ')':
+		v, tp := l.lookupSymbol()
 		t := token.Token{
-			Type:    token.SYMBOL,
+			Type:    tp,
 			Literal: v,
-			Value:   val,
 		}
 		return t, nil
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
@@ -100,21 +99,12 @@ func (l *lexer) findToken() (token.Token, error) {
 		return t, nil
 	default:
 		v := l.readIdent()
-		val, err := value.Convert(v)
-		isKeyword, _ := value.CheckKeyword(v)
-		if err != nil {
-			t := token.Token{
-				Type:    token.ERROR,
-				Literal: v,
-			}
-			return t, err
-		}
+		isKeyword, tp := token.CheckKeyword(v)
 		t := token.Token{
 			Literal: v,
-			Value:   val,
 		}
 		if isKeyword {
-			t.Type = token.KEYWORD
+			t.Type = tp
 		} else {
 			t.Type = token.IDENT
 		}
@@ -154,31 +144,37 @@ func (l *lexer) readNumber() string {
 	return string(v)
 }
 
-func (l *lexer) lookupSymbol() (string, value.Value) {
+func (l *lexer) lookupSymbol() (string, token.Type) {
 	ch := l.getCurrentChar()
 	var v string
-	val := value.Value{}
+	var val token.Type
 	switch ch {
 	case ';':
-		val.Type = value.S_SEMICOLON
+		val = token.S_SEMICOLON
 		v = ";"
 	case '+':
-		val.Type = value.S_PLUS
+		val = token.S_PLUS
 		v = "+"
 	case '-':
-		val.Type = value.S_MINUS
+		val = token.S_MINUS
 		v = "-"
 	case '*':
-		val.Type = value.S_ASTERISK
+		val = token.S_ASTERISK
 		v = "*"
 	case '/':
-		val.Type = value.S_SOLIDAS
+		val = token.S_SOLIDAS
 		v = "/"
 	case '%':
-		val.Type = value.S_PERCENT
+		val = token.S_PERCENT
 		v = "%"
+	case '(':
+		val = token.S_LPAREN
+		v = "("
+	case ')':
+		val = token.S_RPAREN
+		v = ")"
 	default:
-		val.Type = value.UNKNOWN
+		val = token.UNKNOWN
 		v = ""
 	}
 	l.readChar()

@@ -107,6 +107,178 @@ func TestTranslate(t *testing.T) {
 				},
 			},
 		},
+		{
+			sql: "SELECT (1 + 2) * 3;",
+			ast: ast.AST{
+				SQL: []ast.SQL{
+					{
+						SELECTStatement: &ast.SELECTStatement{
+							Select: &ast.SELECTClause{
+								ResultColumns: []ast.ResultColumn{
+									{
+										Expression: &ast.Expression{
+											BinaryOperation: &ast.BinaryOpe{
+												Operator: ast.B_ASTERISK,
+												Left: &ast.Expression{
+													BinaryOperation: &ast.BinaryOpe{
+														Operator: ast.B_PLUS,
+														Left: &ast.Expression{
+															Literal: &ast.Literal{
+																Numeric: &ast.Numeric{
+																	Integral: 1,
+																},
+															},
+														},
+														Right: &ast.Expression{
+															Literal: &ast.Literal{
+																Numeric: &ast.Numeric{
+																	Integral: 2,
+																},
+															},
+														},
+													},
+												},
+												Right: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 3,
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: []vm.VMCode{
+				{
+					Operator: vm.PUSH,
+					Operand1: vm.VMValue{
+						Type:     vm.Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: vm.PUSH,
+					Operand1: vm.VMValue{
+						Type:     vm.Integer,
+						Integral: 2,
+					},
+				},
+				{
+					Operator: vm.ADD,
+				},
+				{
+					Operator: vm.PUSH,
+					Operand1: vm.VMValue{
+						Type:     vm.Integer,
+						Integral: 3,
+					},
+				},
+				{
+					Operator: vm.MUL,
+				},
+				{
+					Operator: vm.STORE,
+				},
+			},
+		},
+		{
+			sql: "SELECT -1;",
+			ast: ast.AST{
+				SQL: []ast.SQL{
+					{
+						SELECTStatement: &ast.SELECTStatement{
+							Select: &ast.SELECTClause{
+								ResultColumns: []ast.ResultColumn{
+									{
+										Expression: &ast.Expression{
+											UnaryOperation: &ast.UnaryOpe{
+												Operator: ast.U_MINUS,
+												Expr: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 1,
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: []vm.VMCode{
+				{
+					Operator: vm.PUSH,
+					Operand1: vm.VMValue{
+						Type:     vm.Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: vm.PUSH,
+					Operand1: vm.VMValue{
+						Type:     vm.Integer,
+						Integral: -1,
+					},
+				},
+				{
+					Operator: vm.MUL,
+				},
+				{
+					Operator: vm.STORE,
+				},
+			},
+		},
+		{
+			sql: "SELECT +1;",
+			ast: ast.AST{
+				SQL: []ast.SQL{
+					{
+						SELECTStatement: &ast.SELECTStatement{
+							Select: &ast.SELECTClause{
+								ResultColumns: []ast.ResultColumn{
+									{
+										Expression: &ast.Expression{
+											UnaryOperation: &ast.UnaryOpe{
+												Operator: ast.U_PLUS,
+												Expr: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 1,
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: []vm.VMCode{
+				{
+					Operator: vm.PUSH,
+					Operand1: vm.VMValue{
+						Type:     vm.Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: vm.STORE,
+				},
+			},
+		},
 	}
 
 	for tn, tc := range testCases {

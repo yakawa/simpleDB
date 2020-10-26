@@ -64,11 +64,82 @@ func TestRun(t *testing.T) {
 				},
 			},
 		},
+		{
+			sql: "SELECT (1 + 2) * 3;",
+			vmc: []VMCode{
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 2,
+					},
+				},
+				{
+					Operator: ADD,
+				},
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 3,
+					},
+				},
+				{
+					Operator: MUL,
+				},
+				{
+					Operator: STORE,
+				},
+			},
+			expected: []result.Value{
+				{
+					Type:     result.Integral,
+					Integral: 9,
+				},
+			},
+		},
+		{
+			sql: "SELECT -1;",
+			vmc: []VMCode{
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: 1,
+					},
+				},
+				{
+					Operator: PUSH,
+					Operand1: VMValue{
+						Type:     Integer,
+						Integral: -1,
+					},
+				},
+				{
+					Operator: MUL,
+				},
+				{
+					Operator: STORE,
+				},
+			},
+			expected: []result.Value{
+				{
+					Type:     result.Integral,
+					Integral: -1,
+				},
+			},
+		},
 	}
 
 	for tn, tc := range testCases {
 		rslt := Run(tc.vmc)
-		t.Logf("[%d] %#+v", tn, rslt)
 		if len(tc.expected) != len(rslt) {
 			t.Fatalf("[%d] %s Mistmach Result numbers", tn, tc.sql)
 		}

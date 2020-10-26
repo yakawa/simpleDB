@@ -75,6 +75,15 @@ func translateExpression(expr *ast.Expression) []vm.VMCode {
 		}
 		codes = append(codes, c)
 		return codes
+	} else if expr.UnaryOperation != nil {
+		c := translateExpression(expr.UnaryOperation.Expr)
+		codes = append(codes, c...)
+		switch expr.UnaryOperation.Operator {
+		case ast.U_MINUS:
+			codes = append(codes, vm.VMCode{Operator: vm.PUSH, Operand1: vm.VMValue{Type: vm.Integer, Integral: -1}})
+			codes = append(codes, vm.VMCode{Operator: vm.MUL})
+		}
+		return codes
 	}
 	return codes
 }

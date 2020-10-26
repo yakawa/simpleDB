@@ -1,0 +1,24 @@
+package helper
+
+func IsWhiteSpace(ch rune) bool {
+	if ch == ' ' || ch == '\n' || ch == '\t' {
+		return true
+	}
+	return false
+}
+
+func IsSymbol(ch rune) bool {
+	if ch == '!' || ch == '"' || ch == '#' || ch == '$' || ch == '%' || ch == '&' || ch == '\'' || ch == '(' || ch == ')' || ch == '=' || ch == '-' ||
+		ch == '~' || ch == '^' || ch == '|' || ch == '`' || ch == '@' || ch == '{' || ch == '}' || ch == '[' || ch == ']' || ch == ':' || ch == '*' ||
+		ch == '+' || ch == ';' || ch == '<' || ch == '>' || ch == ',' || ch == '.' || ch == '?' || ch == '/' || ch == '_' {
+		return true
+	}
+	return false
+}
+
+func IsDigit(ch rune) bool {
+	if ch == '0' || ch == '1' || ch == '2' || ch == '3' || ch == '4' || ch == '5' || ch == '6' || ch == '7' || ch == '8' || ch == '9' {
+		return true
+	}
+	return false
+}

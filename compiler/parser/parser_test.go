@@ -19,11 +19,8 @@ func TestParser(t *testing.T) {
 			sql: "SELECT 1;",
 			tokens: token.Tokens{
 				{
-					Type:    token.KEYWORD,
+					Type:    token.K_SELECT,
 					Literal: "SELECT",
-					Value: value.Value{
-						Type: value.K_SELECT,
-					},
 				},
 				{
 					Type:    token.NUMBER,
@@ -34,11 +31,8 @@ func TestParser(t *testing.T) {
 					},
 				},
 				{
-					Type:    token.SYMBOL,
+					Type:    token.S_SEMICOLON,
 					Literal: ";",
-					Value: value.Value{
-						Type: value.S_SEMICOLON,
-					},
 				},
 				{
 					Type: token.EOS,
@@ -70,11 +64,8 @@ func TestParser(t *testing.T) {
 			sql: "SELECT 1 + 2;",
 			tokens: token.Tokens{
 				{
-					Type:    token.KEYWORD,
+					Type:    token.K_SELECT,
 					Literal: "SELECT",
-					Value: value.Value{
-						Type: value.K_SELECT,
-					},
 				},
 				{
 					Type:    token.NUMBER,
@@ -85,11 +76,8 @@ func TestParser(t *testing.T) {
 					},
 				},
 				{
-					Type:    token.SYMBOL,
+					Type:    token.S_PLUS,
 					Literal: "+",
-					Value: value.Value{
-						Type: value.S_PLUS,
-					},
 				},
 				{
 					Type:    token.NUMBER,
@@ -100,11 +88,8 @@ func TestParser(t *testing.T) {
 					},
 				},
 				{
-					Type:    token.SYMBOL,
+					Type:    token.S_SEMICOLON,
 					Literal: ";",
-					Value: value.Value{
-						Type: value.S_SEMICOLON,
-					},
 				},
 				{
 					Type: token.EOS,
@@ -144,6 +129,215 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
+		{
+			sql: "SELECT (1 + 2) * 3;",
+			tokens: token.Tokens{
+				{
+					Type:    token.K_SELECT,
+					Literal: "SELECT",
+				},
+				{
+					Type:    token.S_LPAREN,
+					Literal: "(",
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "1",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 1,
+					},
+				},
+				{
+					Type:    token.S_PLUS,
+					Literal: "+",
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "2",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 2,
+					},
+				},
+				{
+					Type:    token.S_RPAREN,
+					Literal: ")",
+				},
+				{
+					Type:    token.S_ASTERISK,
+					Literal: "*",
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "3",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 3,
+					},
+				},
+				{
+					Type:    token.S_SEMICOLON,
+					Literal: ";",
+				},
+				{
+					Type: token.EOS,
+				},
+			},
+			expected: &ast.AST{
+				SQL: []ast.SQL{
+					{
+						SELECTStatement: &ast.SELECTStatement{
+							Select: &ast.SELECTClause{
+								ResultColumns: []ast.ResultColumn{
+									{
+										Expression: &ast.Expression{
+											BinaryOperation: &ast.BinaryOpe{
+												Operator: ast.B_ASTERISK,
+												Left: &ast.Expression{
+													BinaryOperation: &ast.BinaryOpe{
+														Operator: ast.B_PLUS,
+														Left: &ast.Expression{
+															Literal: &ast.Literal{
+																Numeric: &ast.Numeric{
+																	Integral: 1,
+																},
+															},
+														},
+														Right: &ast.Expression{
+															Literal: &ast.Literal{
+																Numeric: &ast.Numeric{
+																	Integral: 2,
+																},
+															},
+														},
+													},
+												},
+												Right: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 3,
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			sql: "SELECT -1;",
+			tokens: token.Tokens{
+				{
+					Type:    token.K_SELECT,
+					Literal: "SELECT",
+				},
+				{
+					Type:    token.S_MINUS,
+					Literal: "-",
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "1",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 1,
+					},
+				},
+				{
+					Type:    token.S_SEMICOLON,
+					Literal: ";",
+				},
+				{
+					Type: token.EOS,
+				},
+			},
+			expected: &ast.AST{
+				SQL: []ast.SQL{
+					{
+						SELECTStatement: &ast.SELECTStatement{
+							Select: &ast.SELECTClause{
+								ResultColumns: []ast.ResultColumn{
+									{
+										Expression: &ast.Expression{
+											UnaryOperation: &ast.UnaryOpe{
+												Operator: ast.U_MINUS,
+												Expr: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 1,
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			sql: "SELECT +1;",
+			tokens: token.Tokens{
+				{
+					Type:    token.K_SELECT,
+					Literal: "SELECT",
+				},
+				{
+					Type:    token.S_PLUS,
+					Literal: "+",
+				},
+				{
+					Type:    token.NUMBER,
+					Literal: "1",
+					Value: value.Value{
+						Type:    value.INTEGER,
+						Integer: 1,
+					},
+				},
+				{
+					Type:    token.S_SEMICOLON,
+					Literal: ";",
+				},
+				{
+					Type: token.EOS,
+				},
+			},
+			expected: &ast.AST{
+				SQL: []ast.SQL{
+					{
+						SELECTStatement: &ast.SELECTStatement{
+							Select: &ast.SELECTClause{
+								ResultColumns: []ast.ResultColumn{
+									{
+										Expression: &ast.Expression{
+											UnaryOperation: &ast.UnaryOpe{
+												Operator: ast.U_PLUS,
+												Expr: &ast.Expression{
+													Literal: &ast.Literal{
+														Numeric: &ast.Numeric{
+															Integral: 1,
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for tn, tc := range testCases {
@@ -153,7 +347,7 @@ func TestParser(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(p, tc.expected) {
-			t.Fatalf("[%d] %s Parse Error :%#+v:", tn, tc.sql, p.SQL[0].SELECTStatement.Select.ResultColumns[0])
+			t.Fatalf("[%d] %s Parse Error", tn, tc.sql)
 		}
 	}
 }

@@ -11,8 +11,8 @@ type parser struct {
 	currentToken token.Token
 	pos          int
 
-	unaryParseFunc  map[value.Type]unaryOpeFunction
-	binaryParseFunc map[value.Type]binaryOpeFunction
+	unaryParseFunc  map[token.Type]unaryOpeFunction
+	binaryParseFunc map[token.Type]binaryOpeFunction
 }
 
 func Parse(tokens token.Tokens) (*ast.AST, error) {
@@ -39,12 +39,12 @@ const (
 	HIGHEST
 )
 
-var precedences = map[value.Type]int{
-	value.S_PLUS:     SUM,
-	value.S_MINUS:    SUM,
-	value.S_ASTERISK: PRODUCT,
-	value.S_SOLIDAS:  PRODUCT,
-	value.S_PERCENT:  PRODUCT,
+var precedences = map[token.Type]int{
+	token.S_PLUS:     SUM,
+	token.S_MINUS:    SUM,
+	token.S_ASTERISK: PRODUCT,
+	token.S_SOLIDAS:  PRODUCT,
+	token.S_PERCENT:  PRODUCT,
 }
 
 func new(tokens token.Tokens) *parser {
@@ -53,16 +53,19 @@ func new(tokens token.Tokens) *parser {
 	}
 	p.readToken()
 
-	p.unaryParseFunc = make(map[value.Type]unaryOpeFunction)
-	p.binaryParseFunc = make(map[value.Type]binaryOpeFunction)
+	p.unaryParseFunc = make(map[token.Type]unaryOpeFunction)
+	p.binaryParseFunc = make(map[token.Type]binaryOpeFunction)
 
-	p.unaryParseFunc[value.INTEGER] = p.parseInteger
+	p.unaryParseFunc[token.NUMBER] = p.parseNumber
+	p.unaryParseFunc[token.S_LPAREN] = p.parseGroupedExpr
+	p.unaryParseFunc[token.S_PLUS] = p.parsePrefixExpr
+	p.unaryParseFunc[token.S_MINUS] = p.parsePrefixExpr
 
-	p.binaryParseFunc[value.S_PLUS] = p.parseBinaryExpr
-	p.binaryParseFunc[value.S_MINUS] = p.parseBinaryExpr
-	p.binaryParseFunc[value.S_ASTERISK] = p.parseBinaryExpr
-	p.binaryParseFunc[value.S_SOLIDAS] = p.parseBinaryExpr
-	p.binaryParseFunc[value.S_PERCENT] = p.parseBinaryExpr
+	p.binaryParseFunc[token.S_PLUS] = p.parseBinaryExpr
+	p.binaryParseFunc[token.S_MINUS] = p.parseBinaryExpr
+	p.binaryParseFunc[token.S_ASTERISK] = p.parseBinaryExpr
+	p.binaryParseFunc[token.S_SOLIDAS] = p.parseBinaryExpr
+	p.binaryParseFunc[token.S_PERCENT] = p.parseBinaryExpr
 
 	return p
 }
@@ -71,6 +74,9 @@ func (p *parser) readToken() {
 	if p.pos >= len(p.tokens) {
 		p.currentToken = token.Token{
 			Type: token.EOS,
+			Value: value.Value{
+				Type: value.EOS,
+			},
 		}
 		return
 	}
@@ -83,9 +89,6 @@ func (p *parser) getNextToken() token.Token {
 	if p.pos >= len(p.tokens) {
 		return token.Token{
 			Type: token.EOS,
-			Value: value.Value{
-				Type: value.EOS,
-			},
 		}
 	}
 	return p.tokens[p.pos]
@@ -95,7 +98,7 @@ func (p *parser) getCurrentTokenPrecedence() int {
 	if p.pos > len(p.tokens) {
 		return LOWEST
 	}
-	if p, exists := precedences[p.currentToken.Value.Type]; exists {
+	if p, exists := precedences[p.currentToken.Type]; exists {
 		return p
 	}
 	return LOWEST
@@ -105,7 +108,7 @@ func (p *parser) getNextTokenPrecedence() int {
 	if p.pos+1 > len(p.tokens) {
 		return LOWEST
 	}
-	if p, exists := precedences[p.getNextToken().Value.Type]; exists {
+	if p, exists := precedences[p.getNextToken().Type]; exists {
 		return p
 	}
 	return LOWEST
@@ -115,8 +118,8 @@ func (p *parser) parse() ([]ast.SQL, error) {
 	SQLs := []ast.SQL{}
 	loop := true
 	for {
-		switch p.currentToken.Value.Type {
-		case value.K_SELECT:
+		switch p.currentToken.Type {
+		case token.K_SELECT:
 			ss, err := p.parseSELECTStatement()
 			if err != nil {
 				return SQLs, err

@@ -22,6 +22,7 @@ type ResultColumn struct {
 
 type Expression struct {
 	Literal         *Literal
+	UnaryOperation  *UnaryOpe
 	BinaryOperation *BinaryOpe
 }
 
@@ -42,6 +43,9 @@ const (
 	B_ASTERISK
 	B_SOLIDAS
 	B_PERCENT
+
+	U_PLUS
+	U_MINUS
 )
 
 func (o OperatorType) String() string {
@@ -56,6 +60,11 @@ func (o OperatorType) String() string {
 		return "/"
 	case B_PERCENT:
 		return "%"
+
+	case U_PLUS:
+		return "+"
+	case U_MINUS:
+		return "-"
 	default:
 		return "Unknwon Operation"
 	}
@@ -65,4 +74,9 @@ type BinaryOpe struct {
 	Operator OperatorType
 	Left     *Expression
 	Right    *Expression
+}
+
+type UnaryOpe struct {
+	Operator OperatorType
+	Expr     *Expression
 }
