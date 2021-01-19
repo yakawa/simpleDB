@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/yakawa/simpleDB/common/result"
-	"github.com/yakawa/simpleDB/vm/functions"
+	"github.com/yakawa/simpleDB/runtime/vm/functions"
 )
 
 type OpeType int

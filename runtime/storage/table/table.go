@@ -9,11 +9,14 @@ type ValueType int
 
 const (
 	_ ValueType = iota
+	Null
 	Integer
 )
 
 func (v ValueType) String() string {
 	switch v {
+	case Null:
+		return "Null"
 	case Integer:
 		return "Integer"
 	default:

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/yakawa/simpleDB/tools/repl"
+	"github.com/yakawa/simpleDB/frontend/repl"
 )
 
 func main() {

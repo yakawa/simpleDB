@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/yakawa/simpleDB/common/ast"
-	"github.com/yakawa/simpleDB/vm"
+	"github.com/yakawa/simpleDB/runtime/vm"
 )
 
 func TestTranslate(t *testing.T) {

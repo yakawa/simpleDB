@@ -11,7 +11,7 @@ import (
 	"github.com/yakawa/simpleDB/compiler/lexer"
 	"github.com/yakawa/simpleDB/compiler/parser"
 	"github.com/yakawa/simpleDB/compiler/planner"
-	"github.com/yakawa/simpleDB/vm"
+	"github.com/yakawa/simpleDB/runtime/vm"
 )
 
 const PROMPT = ">>"
